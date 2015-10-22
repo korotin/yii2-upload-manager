@@ -91,6 +91,7 @@ class UploadManager extends Component
     {
         $absolutePath = $this->getAbsolutePath($path);
         if (!file_exists($absolutePath)) {
+            // FIXME Check return value.
             FileHelper::createDirectory($absolutePath);
         }
 

@@ -14,7 +14,7 @@ use Yii;
 use Codeception\Specify;
 use yii\codeception\TestCase;
 
-class TranslitValidatorTest extends TestCase
+class UploadManagerTest extends TestCase
 {
     use Specify;
 
@@ -45,6 +45,56 @@ class TranslitValidatorTest extends TestCase
                 vfsStream::url('fs/upload/test/test.file'),
                 Yii::$app->uploads->getAbsolutePath('test/test.file')
             );
+        });
+    }
+
+    public function testCreatePath()
+    {
+        $this->specify('test createPath for new path', function ($path) {
+            $expectedAbsolutePath = vfsStream::url('fs/upload/'.$path);
+
+            $this->assertFileNotExists($expectedAbsolutePath);
+            $absolutePath = Yii::$app->uploads->createPath($path);
+            $this->assertFileExists($expectedAbsolutePath);
+            $this->assertEquals(
+                $expectedAbsolutePath,
+                $absolutePath
+            );
+        }, [
+            'examples' => [
+                ['test'],
+                ['test2/test']
+            ]
+        ]);
+
+        $this->specify('test createPath for existing path', function ($path) {
+            $expectedAbsolutePath = vfsStream::url('fs/upload/'.$path);
+
+            $this->assertFileExists($expectedAbsolutePath);
+            $absolutePath = Yii::$app->uploads->createPath($path);
+            $this->assertFileExists($expectedAbsolutePath);
+            $this->assertEquals(
+                $expectedAbsolutePath,
+                $absolutePath
+            );
+        }, [
+            'examples' => [
+                ['test'],
+                ['test2/test']
+            ]
+        ]);
+    }
+
+    public function testCretePartitionedPath()
+    {
+        $this->specify('test createPartitionedPath', function () {
+            $expectedAbsolutePath = vfsStream::url('fs/upload/test');
+
+            $this->assertFileNotExists($expectedAbsolutePath);
+            $absolutePartitionedPath = Yii::$app->uploads->createPartitionedPath('test', 'file');
+            $this->assertFileExists($expectedAbsolutePath);
+            $this->assertFileExists($absolutePartitionedPath);
+            $this->assertRegExp('/test\/[0-9a-f]{2}$/', $absolutePartitionedPath);
         });
     }
 }
