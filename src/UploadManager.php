@@ -72,6 +72,24 @@ class UploadManager extends Component
     }
 
     /**
+     * Get prefixed path.
+     *
+     * @param  string $path
+     * @param  string $prefix
+     * @return string
+     */
+    protected function getPrefixedPath($path, $prefix)
+    {
+        if (substr($path, 0, 1) !== '/') {
+            $path = '/'.$path;
+        }
+        $path = FileHelper::normalizePath($path);
+        $prefixedPath = Yii::getAlias($prefix.$path);
+
+        return $prefixedPath;
+    }
+
+    /**
      * Add index to file name.
      *
      * @param  string  $name
@@ -145,14 +163,7 @@ class UploadManager extends Component
      */
     public function getUrl($path)
     {
-        if (substr($path, 0, 1) !== '/') {
-            $path = '/'.$path;
-        }
-
-        $path = FileHelper::normalizePath($path);
-        $path = Yii::getAlias($this->uploadUrl.$path);
-
-        return $path;
+        return $this->getPrefixedPath($path, $this->uploadUrl);
     }
 
     /**
@@ -163,14 +174,7 @@ class UploadManager extends Component
      */
     public function getAbsolutePath($path)
     {
-        if (substr($path, 0, 1) !== '/') {
-            $path = '/'.$path;
-        }
-
-        $path = FileHelper::normalizePath($path);
-        $absolutePath = Yii::getAlias($this->uploadDir.$path);
-
-        return $absolutePath;
+        return $this->getPrefixedPath($path, $this->uploadDir);
     }
 
     /**
@@ -232,10 +236,10 @@ class UploadManager extends Component
      *
      * Returns relative path with partition folder.
      *
-     * @param  string $path
-     * @param  string $name
-     * @param  string $content
-     * @param  int    $overwrite
+     * @param  string        $path
+     * @param  string        $name
+     * @param  string        $content
+     * @param  int[optional] $overwriteStrategy
      * @return string
      */
     public function saveContent($path, $name, $content, $overwriteStrategy = self::STRATEGY_KEEP)
