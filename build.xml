@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="yii2-translit-validator" default="help">
+<project name="yii2-upload-manager" default="help">
     <target name="help">
         <echo>Available commands:
 
