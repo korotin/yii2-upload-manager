@@ -46,8 +46,7 @@ There is no need to create upload folder manually. Extension will make it automa
 Usage
 -----
 
-Simple cases
-============
+### Simple cases
 
 Extension provides two ways for storing files. First one is to store raw data as file. Look at example:
 
@@ -97,8 +96,7 @@ $filePath =
 
 ```saveUpload()``` method works likewise ```saveContent()``` and returns unique upload id as well. Hovewer ```saveUpload()``` does not accept file name since it takes one from ```\yii\web\UploadedFile::$name``` property.
 
-Name collisions
-===============
+### Name collisions
 
 By deafult if you'll try to save file that already exists extension will throw an exception. Such behavior is not always suitable and you definitely don't want to solve each collision manually. So you have two different strategies which solve collisions automatically.
 
