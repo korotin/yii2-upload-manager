@@ -1,0 +1,21 @@
+{
+    "name": "herroffizier/yii2-upload-manager",
+    "type": "yii2-extension",
+    "keywords": ["yii", "yii2", "yii 2", "extension", "upload"],
+    "description": "Simplifies file storing in Yii 2.",
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "require-dev": {
+        "yiisoft/yii2-codeception": "*",
+        "codeception/codeception": "2.0.*",
+        "codeception/verify": "*",
+        "codeception/specify": "*",
+        "squizlabs/php_codesniffer": "dev-master",
+        "mikey179/vfsStream": "~1",
+        "phing/phing": "*"
+    },
+    "autoload": {
+        "psr-4": {"herroffizier\\yii2um\\tests\\": "tests/", "herroffizier\\yii2um\\": "src/"}
+    }
+}
