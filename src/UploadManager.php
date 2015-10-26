@@ -12,6 +12,7 @@ namespace herroffizier\yii2um;
 use Yii;
 use yii\base\Component;
 use yii\base\InvalidParamException;
+use yii\web\UploadedFile;
 use yii\helpers\FileHelper;
 
 class UploadManager extends Component
@@ -232,7 +233,7 @@ class UploadManager extends Component
     }
 
     /**
-     * Save $content to $path/$name in upload folder.
+     * Save data stored in $content as file to $path/$name in upload folder.
      *
      * Returns relative path with partition folder.
      *
@@ -249,6 +250,26 @@ class UploadManager extends Component
 
         file_put_contents($absoluteFilePath, $content);
         unset($content);
+
+        return $filePath;
+    }
+
+    /**
+     * Save $upload file to $path/$name in upload folder.
+     *
+     * Returns relative path with partition folder.
+     *
+     * @param  string        $path
+     * @param  UploadedFile  $upload
+     * @param  int[optional] $overwriteStrategy
+     * @return string
+     */
+    public function saveUpload($path, UploadedFile $upload, $overwriteStrategy = self::STRATEGY_KEEP)
+    {
+        $filePath = $this->createFilePath($path, $upload->name, $overwriteStrategy);
+        $absoluteFilePath = $this->getAbsolutePath($filePath);
+
+        $upload->saveAs($absoluteFilePath);
 
         return $filePath;
     }

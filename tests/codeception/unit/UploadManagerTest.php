@@ -12,6 +12,8 @@ namespace herroffizier\yii2um\tests\codeception\unit;
 use org\bovigo\vfs\vfsStream;
 use Yii;
 use Codeception\Specify;
+use Codeception\Util\Stub;
+use yii\web\UploadedFile;
 use yii\codeception\TestCase;
 use yii\base\InvalidParamException;
 use herroffizier\yii2um\UploadManager;
@@ -224,5 +226,26 @@ class UploadManagerTest extends TestCase
             ]
         ]);
 
+    }
+
+    public function testSaveUpload()
+    {
+        $this->specify('test saveUpload', function () {
+            $upload = Stub::make(UploadedFile::className(), [
+                'name' => 'test.txt',
+                'saveAs' => Stub::once(function ($absoluteFilePath) {
+                    file_put_contents($absoluteFilePath, 'test content');
+
+                    return true;
+                }),
+            ], $this);
+
+            $filePath = Yii::$app->uploads->saveUpload('test', $upload);
+            $this->assertNotEmpty($filePath);
+            $absoluteFilePath = Yii::$app->uploads->getAbsolutePath($filePath);
+            $this->assertFileExists($absoluteFilePath);
+            $this->assertEquals('test.txt', pathinfo($filePath, PATHINFO_BASENAME));
+            $this->assertEquals('test content', file_get_contents($absoluteFilePath));
+        });
     }
 }
