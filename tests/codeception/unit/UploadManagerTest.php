@@ -35,7 +35,6 @@ class UploadManagerTest extends TestCase
     public function testGetUrl()
     {
         $this->specify('get url for relative path', function () {
-
             $this->assertEquals(
                 '/upload/test/test.file',
                 Yii::$app->uploads->getUrl('test/test.file')
