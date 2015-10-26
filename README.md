@@ -100,15 +100,15 @@ $filePath =
 
 By deafult if you'll try to save file that already exists extension will throw an exception. Such behavior is not always suitable and you definitely don't want to solve each collision manually. So you have two different strategies which solve collisions automatically.
 
-First strategy is to overwrite existing file silently. Such approach may be suitable, for example, saving user avatars.
+First strategy is to overwrite existing file silently. Such approach may be suitable for saving user avatars, for example.
 
 Second strategy is to add incremental index to file name in case of collision. This strategy may be applied when dealing with user file uploads and original file names are important.
 
-Now let's find out how to appy these strategies.
+Now let's find out how to apply these strategies.
 
 Strategy (throw exception, overwrite, add index) is identified by constant defined in ```\herroffizier\yii2um\UploadManager``` class: ```\herroffizier\yii2um\UploadManager::STRATEGY_KEEP```, ```\herroffizier\yii2um\UploadManager::STRATEGY_OVERWRITE``` and ```\herroffizier\yii2um\UploadManager::STRATEGY_RENAME```. 
 
-Also both methods ```saveContent``` and ```saveUpload``` have optional last parameter named ```$overwriteStrategy``` to which one of described above constants may be passed. Default value is ```\herroffizier\yii2um\UploadManager::STRATEGY_KEEP```.
+Also both methods ```saveContent``` and ```saveUpload``` have optional last parameter named ```$overwriteStrategy``` to which one of constants may be passed. Default value for ```$overwriteStrategy``` is ```\herroffizier\yii2um\UploadManager::STRATEGY_KEEP```.
 
 To sum up, let's take a look at example. Following code will throw an exception:
 
@@ -127,7 +127,7 @@ Yii::$app->uploads->saveContent(
 
 ```
 
-This code will work correctly:
+Hovewer, this code will work correctly because we applied overwrite strategy:
 
 ```php
 Yii::$app->uploads->saveContent(
@@ -147,7 +147,7 @@ Yii::$app->uploads->saveContent(
 
 Now ```file.txt``` contains ```test 2``` string.
 
-Finally, let's apply last strategy:
+Finally, let's apply rename strategy:
 
 ```php
 $filePath1 = Yii::$app->uploads->saveContent(
@@ -166,4 +166,4 @@ $filePath2 = Yii::$app->uploads->saveContent(
 echo "$filePath1, $filePath2";
 ```
 
-This code also will complete correctly and output ```useless-files/75/file.txt, useless-files/75/file-1.txt```.
+This code will also complete correctly and output ```useless-files/75/file.txt, useless-files/75/file-1.txt```. As you may see, second file has an index ```1``` at the end of its name.
