@@ -1,12 +1,11 @@
-Yii2 Upload Manager
-===================
+# Yii2 Upload Manager
+
 
 [![Build Status](https://travis-ci.org/herroffizier/yii2-upload-manager.svg?branch=master)](https://travis-ci.org/herroffizier/yii2-upload-manager) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/herroffizier/yii2-upload-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/herroffizier/yii2-upload-manager/?branch=master) [![Code Coverage](https://scrutinizer-ci.com/g/herroffizier/yii2-upload-manager/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/herroffizier/yii2-upload-manager/?branch=master)
 
 Yii2 Upload Manager is a small extension that organizes file uploads and takes control over upload paths and urls.
 
-Features
---------
+## Features
 
 * Groups uploads into folders and folder structures with any depth. 
 * Divides upload folders into subfolders to avoid storing many files in one folder.
@@ -14,13 +13,13 @@ Features
 * Uses transparent file name generation mechanism.
 * 100% code coverage :-)
 
-Installation
-------------
+## Installation
+
 
 Install extension with Composer:
 
-```
-composer require herroffizier/yii2-upload-manager
+```bash
+composer require herroffizier/yii2-upload-manager:@stable
 ```
 
 Add extension to your application config:
@@ -43,12 +42,41 @@ Add extension to your application config:
 
 There is no need to create upload folder manually. Extension will make it automatically.
 
-Usage
------
+## Usage
 
-### Simple cases
+### Storing files.
 
-Extension provides two ways for storing files. First one is to store raw data as file. Look at example:
+Extension provides few ways to store files.
+
+Simply copy file to upload folder:
+
+```php
+$filePath = 
+    Yii::$app->uploads->saveFile(
+        // upload group
+        'useless-files',
+        // upload file name
+        'file.txt',
+        // original file name
+        '/tmp/somefile.txt'
+    );
+```
+
+Move file to upload folder:
+
+```php
+$filePath = 
+    Yii::$app->uploads->moveFile(
+        // upload group
+        'useless-files',
+        // upload file name
+        'file.txt',
+        // original file name
+        '/tmp/somefile.txt'
+    );
+```
+
+Save raw data as file in upload folder:
 
 ```php
 $content = 'test';
@@ -62,25 +90,9 @@ $filePath =
         // file content
         $content
     );
-
-echo $filePath;
 ```
 
-This code will output ```useless-files/75/file.txt``` (as you may guess, subfolder ```75``` is a partition subfolder). 
-
-```$filePath``` value is an unique upload id which will remain the same even if you move or rename root upload folder. So, if you want to save link to upload somewhere, you definitely should use value that ```saveContent()``` method returns.
-
-Now, let's try to get absolute path and URL to our upload:
-
-```php
-// get absolute path
-$absoluteFilePath = Yii::$app->uploads->getAbsolutePath($filePath);
-
-// get url
-$relativeUrl = Yii::$app->uploads->getUrl($filePath);
-```
-
-Okay, let's try to use ```\yii\web\UploadedFile``` instance to save file:
+Save ```\yii\web\UploadedFile``` instance to uplaod foder:
 
 ```php
 $upload = \yii\web\UploadedFile::getInstance(/* ... */);
@@ -94,7 +106,17 @@ $filePath =
     );
 ```
 
-```saveUpload()``` method works likewise ```saveContent()``` and returns unique upload id as well. Hovewer ```saveUpload()``` does not accept file name since it takes one from ```\yii\web\UploadedFile::$name``` property.
+As you may notice, all methods described above return ```$filePath``` value which is relative path to uploaded file and may be considered as unique upload id. 
+
+It can be converted to absolute file by method ```getAbsolutePath``` or to absolute url by method ```getUrl```:
+
+```php
+// get absolute path
+$absoluteFilePath = Yii::$app->uploads->getAbsolutePath($filePath);
+
+// get url
+$relativeUrl = Yii::$app->uploads->getUrl($filePath);
+```
 
 ### Name collisions
 
