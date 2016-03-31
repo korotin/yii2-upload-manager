@@ -1,6 +1,6 @@
 <?php
 /**
- * Upload Manager
+ * Upload Manager.
  *
  * This file contains upload manager.
  *
@@ -49,7 +49,8 @@ class UploadManager extends Component
     /**
      * Generate partition name based on file name.
      *
-     * @param  string $name
+     * @param string $name
+     *
      * @return string
      */
     protected function getPartitionName($name)
@@ -60,8 +61,9 @@ class UploadManager extends Component
     /**
      * Add partition folder to given path.
      *
-     * @param  string $path
-     * @param  string $name
+     * @param string $path
+     * @param string $name
+     *
      * @return string
      */
     protected function getPartitionedPath($path, $name)
@@ -75,8 +77,9 @@ class UploadManager extends Component
     /**
      * Get prefixed path.
      *
-     * @param  string $path
-     * @param  string $prefix
+     * @param string $path
+     * @param string $prefix
+     *
      * @return string
      */
     protected function getPrefixedPath($path, $prefix)
@@ -93,8 +96,9 @@ class UploadManager extends Component
     /**
      * Add index to file name.
      *
-     * @param  string  $name
-     * @param  integer $index
+     * @param string $name
+     * @param int    $index
+     *
      * @return string
      */
     protected function addIndexToName($name, $index)
@@ -113,9 +117,10 @@ class UploadManager extends Component
      *
      * @throws InvalidParamException when file cannot be created.
      *
-     * @param  string $path
-     * @param  string $name
-     * @param  int    $overwriteStrategy
+     * @param string $path
+     * @param string $name
+     * @param int    $overwriteStrategy
+     *
      * @return string
      */
     protected function createFilePath($path, $name, $overwriteStrategy)
@@ -132,12 +137,11 @@ class UploadManager extends Component
                 case self::STRATEGY_RENAME:
                     $index = 0;
                     do {
-                        $index++;
+                        ++$index;
                         $indexedName = $this->addIndexToName($name, $index);
 
                         $partitionedPath = $this->getPartitionedPath($path, $name);
                         $absolutePath = $this->getAbsolutePath($partitionedPath);
-
                     } while (file_exists($absolutePath.'/'.$indexedName));
                     $name = $indexedName;
                     break;
@@ -159,7 +163,8 @@ class UploadManager extends Component
     /**
      * Get relative URL for relative path.
      *
-     * @param  string $path
+     * @param string $path
+     *
      * @return string
      */
     public function getUrl($path)
@@ -170,7 +175,8 @@ class UploadManager extends Component
     /**
      * Get absolute path for relative path.
      *
-     * @param  string $path
+     * @param string $path
+     *
      * @return string
      */
     public function getAbsolutePath($path)
@@ -185,7 +191,8 @@ class UploadManager extends Component
      *
      * @throws InvalidParamException when file cannot be created.
      *
-     * @param  string $path
+     * @param string $path
+     *
      * @return string
      */
     public function createPath($path)
@@ -208,8 +215,9 @@ class UploadManager extends Component
      *
      * Returns absolute path of given path.
      *
-     * @param  string $path
-     * @param  string $name
+     * @param string $path
+     * @param string $name
+     *
      * @return string
      */
     public function createPartitionedPath($path, $name)
@@ -222,8 +230,9 @@ class UploadManager extends Component
     /**
      * Whether file with given relative path exists.
      *
-     * @param  string  $filePath
-     * @return boolean
+     * @param string $filePath
+     *
+     * @return bool
      */
     public function exists($filePath)
     {
@@ -237,10 +246,11 @@ class UploadManager extends Component
      *
      * Returns relative path with partition folder.
      *
-     * @param  string        $path
-     * @param  string        $name
-     * @param  string        $content
-     * @param  int[optional] $overwriteStrategy
+     * @param string        $path
+     * @param string        $name
+     * @param string        $content
+     * @param int[optional] $overwriteStrategy
+     *
      * @return string
      */
     public function saveContent($path, $name, $content, $overwriteStrategy = self::STRATEGY_KEEP)
@@ -255,13 +265,14 @@ class UploadManager extends Component
     }
 
     /**
-     * Save $upload file to $path/$name in upload folder.
+     * Save $upload file to $path in upload folder.
      *
      * Returns relative path with partition folder.
      *
-     * @param  string        $path
-     * @param  UploadedFile  $upload
-     * @param  int[optional] $overwriteStrategy
+     * @param string        $path
+     * @param UploadedFile  $upload
+     * @param int[optional] $overwriteStrategy
+     *
      * @return string
      */
     public function saveUpload($path, UploadedFile $upload, $overwriteStrategy = self::STRATEGY_KEEP)
@@ -272,5 +283,57 @@ class UploadManager extends Component
         $upload->saveAs($absoluteFilePath);
 
         return $filePath;
+    }
+
+    /**
+     * Move or copy file.
+     *
+     * @param string        $path
+     * @param string        $absoluteFilePath
+     * @param int[optional] $overwriteStrategy
+     * @param string        $function
+     *
+     * @return string
+     */
+    protected function saveFileInternal($path, $absoluteFilePath, $overwriteStrategy, $function)
+    {
+        $filePath = $this->createFilePath($path, pathinfo($absoluteFilePath, PATHINFO_BASENAME), $overwriteStrategy);
+        $newAbsoluteFilePath = $this->getAbsolutePath($filePath);
+
+        $function($absoluteFilePath, $newAbsoluteFilePath);
+
+        return $filePath;
+    }
+
+    /**
+     * Save $absoluteFilePath file to $path in upload folder.
+     *
+     * Returns relative path with partition folder.
+     *
+     * @param string        $path
+     * @param string        $absoluteFilePath
+     * @param int[optional] $overwriteStrategy
+     *
+     * @return string
+     */
+    public function saveFile($path, $absoluteFilePath, $overwriteStrategy = self::STRATEGY_KEEP)
+    {
+        return $this->saveFileInternal($path, $absoluteFilePath, $overwriteStrategy, 'copy');
+    }
+
+    /**
+     * Move $absoluteFilePath file to $path in upload folder.
+     *
+     * Returns relative path with partition folder.
+     *
+     * @param string        $path
+     * @param string        $absoluteFilePath
+     * @param int[optional] $overwriteStrategy
+     *
+     * @return string
+     */
+    public function moveFile($path, $absoluteFilePath, $overwriteStrategy = self::STRATEGY_KEEP)
+    {
+        return $this->saveFileInternal($path, $absoluteFilePath, $overwriteStrategy, 'rename');
     }
 }

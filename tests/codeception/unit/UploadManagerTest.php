@@ -1,6 +1,6 @@
 <?php
 /**
- * Upload Manager
+ * Upload Manager.
  *
  * This file contains upload manager test.
  *
@@ -16,6 +16,7 @@ use Codeception\Util\Stub;
 use yii\web\UploadedFile;
 use yii\codeception\TestCase;
 use yii\base\InvalidParamException;
+use yii\base\ErrorException;
 use herroffizier\yii2um\UploadManager;
 
 class UploadManagerTest extends TestCase
@@ -67,40 +68,40 @@ class UploadManagerTest extends TestCase
         }, [
             'examples' => [
                 ['test-new'],
-                ['test-new-2/test']
-            ]
+                ['test-new-2/test'],
+            ],
         ]);
 
-        $this->specify('create existing folders in upload folder', function ($path) {
-            $expectedAbsolutePath = Yii::$app->uploads->createPath($path);
-            $absoluteTestFilePath = $expectedAbsolutePath.'/test-file';
+            $this->specify('create existing folders in upload folder', function ($path) {
+                $expectedAbsolutePath = Yii::$app->uploads->createPath($path);
+                $absoluteTestFilePath = $expectedAbsolutePath.'/test-file';
 
-            $this->assertFileExists($expectedAbsolutePath);
-            file_put_contents($absoluteTestFilePath, 'test content');
-            $this->assertFileExists($absoluteTestFilePath);
+                $this->assertFileExists($expectedAbsolutePath);
+                file_put_contents($absoluteTestFilePath, 'test content');
+                $this->assertFileExists($absoluteTestFilePath);
 
-            $absolutePath = Yii::$app->uploads->createPath($path);
-            $this->assertFileExists($expectedAbsolutePath);
-            $this->assertEquals(
-                $expectedAbsolutePath,
-                $absolutePath
-            );
-            $this->assertFileExists($absoluteTestFilePath);
-        }, [
+                $absolutePath = Yii::$app->uploads->createPath($path);
+                $this->assertFileExists($expectedAbsolutePath);
+                $this->assertEquals(
+                    $expectedAbsolutePath,
+                    $absolutePath
+                );
+                $this->assertFileExists($absoluteTestFilePath);
+            }, [
             'examples' => [
                 ['test-existing'],
-                ['test-existing-2/test']
-            ]
-        ]);
+                ['test-existing-2/test'],
+            ],
+            ]);
 
-        $this->specify('reject to create folder when file with the same name exists', function () {
-            $absoluteFilePath = vfsStream::url('fs/upload/test-file');
-            touch($absoluteFilePath);
+            $this->specify('reject to create folder when file with the same name exists', function () {
+                $absoluteFilePath = vfsStream::url('fs/upload/test-file');
+                touch($absoluteFilePath);
 
-            Yii::$app->uploads->createPath('test-file');
-        }, [
-            'throws' => new InvalidParamException
-        ]);
+                Yii::$app->uploads->createPath('test-file');
+            }, [
+            'throws' => new InvalidParamException(),
+            ]);
     }
 
     public function testCreatePartitionedPath()
@@ -149,7 +150,7 @@ class UploadManagerTest extends TestCase
             $this->specify('fail on ', function () {
                 $filePath = Yii::$app->uploads->saveContent('test', 'test-file-keep', 'test content 2');
             }, [
-                'throws' => new InvalidParamException
+                'throws' => new InvalidParamException(),
             ]);
 
             $this->assertEquals('test content', file_get_contents($absoluteFilePath));
@@ -191,7 +192,7 @@ class UploadManagerTest extends TestCase
                 UploadManager::STRATEGY_OVERWRITE
             );
         }, [
-            'throws' => new InvalidParamException
+            'throws' => new InvalidParamException(),
         ]);
 
         $this->specify('test saveContent with STRATEGY_RENAME', function ($name) {
@@ -221,10 +222,9 @@ class UploadManagerTest extends TestCase
         }, [
             'examples' => [
                 ['test-file-rename'],
-                ['test-file-rename.txt']
-            ]
+                ['test-file-rename.txt'],
+            ],
         ]);
-
     }
 
     public function testSaveUpload()
@@ -246,5 +246,55 @@ class UploadManagerTest extends TestCase
             $this->assertEquals('test.txt', pathinfo($filePath, PATHINFO_BASENAME));
             $this->assertEquals('test content', file_get_contents($absoluteFilePath));
         });
+    }
+
+    public function testSaveFile()
+    {
+        $this->specify('test saveFile', function () {
+            $absoluteFilePath = vfsStream::url('fs/test-file');
+            file_put_contents($absoluteFilePath, 'test');
+            $this->assertFileExists($absoluteFilePath);
+
+            $filePath = Yii::$app->uploads->saveFile('test', $absoluteFilePath);
+            $this->assertNotEmpty($filePath);
+            $newAbsoluteFilePath = Yii::$app->uploads->getAbsolutePath($filePath);
+            $this->assertFileExists($newAbsoluteFilePath);
+            $this->assertFileExists($absoluteFilePath);
+            $this->assertEquals('test', file_get_contents($newAbsoluteFilePath));
+        });
+
+        $this->specify('test saveFile with nonexistent file', function () {
+            $absoluteFilePath = vfsStream::url('fs/test-file2');
+            $this->assertFileNotExists($absoluteFilePath);
+
+            $filePath = Yii::$app->uploads->saveFile('test', $absoluteFilePath);
+        }, [
+            'throws' => new ErrorException(),
+        ]);
+    }
+
+    public function testMoveFile()
+    {
+        $this->specify('test moveFile', function () {
+            $absoluteFilePath = vfsStream::url('fs/test-file');
+            file_put_contents($absoluteFilePath, 'test');
+            $this->assertFileExists($absoluteFilePath);
+
+            $filePath = Yii::$app->uploads->moveFile('test', $absoluteFilePath);
+            $this->assertNotEmpty($filePath);
+            $newAbsoluteFilePath = Yii::$app->uploads->getAbsolutePath($filePath);
+            $this->assertFileExists($newAbsoluteFilePath);
+            $this->assertFileNotExists($absoluteFilePath);
+            $this->assertEquals('test', file_get_contents($newAbsoluteFilePath));
+        });
+
+        $this->specify('test moveFile with nonexistent file', function () {
+            $absoluteFilePath = vfsStream::url('fs/test-file2');
+            $this->assertFileNotExists($absoluteFilePath);
+
+            $filePath = Yii::$app->uploads->saveFile('test', $absoluteFilePath);
+        }, [
+            'throws' => new ErrorException(),
+        ]);
     }
 }
